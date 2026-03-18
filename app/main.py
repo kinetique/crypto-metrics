@@ -159,14 +159,21 @@ def kill_service():
 
 @app.get("/metrics")
 def get_metrics():
+    query_api = influx.query_api()
+
     query = f'''
-    from(bucket: "{os.getenv("INFLUX_BUCKET")}")
-    |> range(start: -10m)
-    |> filter(fn: (r) => r["_field"] == "price")
-    |> keep(columns: ["_value"])
+    from(bucket: "{INFLUX_BUCKET}")
+      |> range(start: -10m)
+      |> filter(fn: (r) => r["_measurement"] == "crypto_price")
+      |> filter(fn: (r) => r["_field"] == "price")
+      |> filter(fn: (r) => r["coin"] == "{COIN_ID}")
+      |> keep(columns: ["_value"])
     '''
 
-    result = client.query_api().query(query)
+    try:
+        result = query_api.query(query)
+    except Exception as e:
+        return {"error": str(e)}
 
     values = []
     for table in result:
