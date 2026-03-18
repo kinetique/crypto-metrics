@@ -181,13 +181,67 @@ def get_metrics():
             values.append(record.get_value())
 
     if not values:
-        return {"error": "no data"}
+        return "<h2>No data available</h2>"
 
-    return {
-        "avg_price": sum(values) / len(values),
-        "min_price": min(values),
-        "max_price": max(values)
-    }
+    avg_price = sum(values) / len(values)
+    min_price = min(values)
+    max_price = max(values)
+
+    html_content = f""" 
+    <html> 
+      <head>
+        <title>Crypto Metrics</title> 
+        <meta charset="utf-8"/> 
+        <meta http-equiv="refresh" content="30"/> 
+        <style> 
+          body {{ 
+            font-family: Arial, sans-serif; 
+            background: #0b1220; 
+            color: #e6e6e6; 
+            padding: 20px; 
+          }} 
+          h1 {{ 
+            text-align: center; 
+            margin-bottom: 40px; 
+          }} 
+          .card {{ 
+            background: #121a2b; 
+            border-radius: 16px; 
+            padding: 24px; 
+            margin: 12px auto; 
+            width: 300px; 
+            text-align: center; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+          }} 
+          .metric {{ 
+            font-size: 22px; 
+            font-weight: bold; 
+            margin: 10px 0; 
+            color: #8ab4ff; 
+          }} 
+          .label {{ 
+          font-size: 14px; 
+          color: #9aa7c0; 
+          }} 
+        </style> 
+      </head> 
+      <body> 
+        <h1>Kinetiq Crypto Metrics</h1> 
+        <div class="card"> 
+          <div class="label">Average price (last 10 min)</div> 
+          <div class="metric">${avg_price:.6f}</div> 
+        </div> 
+        <div class="card"> 
+          <div class="label">Minimum price (last 10 min)</div> 
+          <div class="metric">${min_price:.6f}</div> 
+        </div> 
+        <div class="card"> 
+          <div class="label">Maximum price (last 10 min)</div> 
+          <div class="metric">${max_price:.6f}</div> 
+        </div> 
+      </body>
+    </html> """
+    return html_content
 
 @app.on_event("startup")
 async def startup_event():
