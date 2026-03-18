@@ -157,6 +157,30 @@ def kill_service():
     os.kill(os.getpid(), signal.SIGTERM)
     return {"status": "killed"}
 
+@app.get("/metrics")
+def get_metrics():
+    query = f'''
+    from(bucket: "{os.getenv("INFLUX_BUCKET")}")
+    |> range(start: -10m)
+    |> filter(fn: (r) => r["_field"] == "price")
+    |> keep(columns: ["_value"])
+    '''
+
+    result = client.query_api().query(query)
+
+    values = []
+    for table in result:
+        for record in table.records:
+            values.append(record.get_value())
+
+    if not values:
+        return {"error": "no data"}
+
+    return {
+        "avg_price": sum(values) / len(values),
+        "min_price": min(values),
+        "max_price": max(values)
+    }
 
 @app.on_event("startup")
 async def startup_event():
