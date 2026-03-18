@@ -157,7 +157,7 @@ def kill_service():
     os.kill(os.getpid(), signal.SIGTERM)
     return {"status": "killed"}
 
-@app.get("/metrics")
+@app.get("/metrics", response_class=HTMLResponse)
 def get_metrics():
     query_api = influx.query_api()
 
